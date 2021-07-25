@@ -1,0 +1,33 @@
+{
+  "name": "netatmo-nodejs-api",
+  "version": "1.0.0",
+  "description": "Node.js API wrapper for Netatmo API.",
+  "main": "lib/index.js",
+  "engines": {
+    "node": ">=8.3.0"
+  },
+  "keywords": [
+    "netatmo",
+    "api",
+    "weather"
+  ],
+  "author": "nioc <dev@nioc.eu>",
+  "license": "AGPL-3.0-or-later",
+  "homepage": "https://github.com/nioc/netatmo-nodejs-api",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nioc/netatmo-nodejs-api.git"
+  },
+  "devDependencies": {
+    "eslint": "^7.31.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-security": "^1.4.0",
+    "nodemon": "^2.0.12"
+  },
+  "dependencies": {
+    "axios": "^0.21.1"
+  }
+}
