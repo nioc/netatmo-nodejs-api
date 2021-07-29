@@ -3,8 +3,14 @@
   "version": "1.1.0",
   "description": "Node.js API wrapper for Netatmo API.",
   "main": "lib/index.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "mocha test/index.test.js",
+    "cover": "nyc --reporter=html mocha test/index.test.js",
+    "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls"
+  },
   "engines": {
-    "node": ">=8.3.0"
+    "node": ">=10.0.0"
   },
   "keywords": [
     "netatmo",
@@ -20,12 +26,16 @@
     "url": "https://github.com/nioc/netatmo-nodejs-api.git"
   },
   "devDependencies": {
+    "axios-mock-adapter": "^1.19.0",
+    "coveralls": "^3.1.1",
     "eslint": "^7.31.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
-    "eslint-plugin-security": "^1.4.0"
+    "eslint-plugin-security": "^1.4.0",
+    "mocha": "^9.0.3",
+    "nyc": "^15.1.0"
   },
   "dependencies": {
     "axios": "^0.21.1"
