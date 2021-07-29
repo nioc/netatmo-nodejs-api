@@ -1,10 +1,11 @@
 # netatmo-nodejs-api
 
 [![license: AGPLv3](https://img.shields.io/badge/license-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![GitHub release](https://img.shields.io/github/release/nioc/netatmo-nodejs-api.svg)](https://github.com/nioc/netatmo-nodejs-api/releases/latest)
-[![npm](https://img.shields.io/npm/dt/netatmo-nodejs-api)](https://www.npmjs.com/package/netatmo-nodejs-api)
-[![npms.io (final)](https://img.shields.io/npms-io/final-score/netatmo-nodejs-api)](https://www.npmjs.com/package/netatmo-nodejs-api)
+[![Build Status](https://travis-ci.com/nioc/netatmo-nodejs-api.svg?branch=master)](https://travis-ci.com/nioc/netatmo-nodejs-api)
 [![Coverage Status](https://coveralls.io/repos/github/nioc/netatmo-nodejs-api/badge.svg?branch=master)](https://coveralls.io/github/nioc/netatmo-nodejs-api?branch=master)
+[![GitHub release](https://img.shields.io/github/release/nioc/netatmo-nodejs-api.svg)](https://github.com/nioc/netatmo-nodejs-api/releases/latest)
+[![npms.io (final)](https://img.shields.io/npms-io/final-score/netatmo-nodejs-api)](https://www.npmjs.com/package/netatmo-nodejs-api)
+[![npm](https://img.shields.io/npm/dt/netatmo-nodejs-api)](https://www.npmjs.com/package/netatmo-nodejs-api)
 
 Node.js API wrapper for Netatmo API.
 

@@ -45,8 +45,11 @@ describe('Request', function () {
       .onGet('/timeout').timeout()
       .onGet('/authError').reply(400, { error: 'invalid_request', error_description: 'Missing parameters, "username" and "password" are required' })
       .onGet('/appError').reply(400, { error: { code: 1, message: 'Access token is missing' } })
-      .onGet('/tokenExpired401').reply(401, { error: { code: 3, message: 'Access token expired' } })
-      .onGet('/tokenExpired403').reply(403, { error: { code: 3, message: 'Access token expired' } })
+      .onGet('/tokenExpired401').replyOnce(401, { error: { code: 3, message: 'Access token expired' } })
+      .onGet('/tokenExpired401').reply(200, { body: '401' })
+      .onGet('/tokenExpired403').replyOnce(403, { error: { code: 3, message: 'Access token expired' } })
+      .onGet('/tokenExpired403').reply(200, { body: '403' })
+      .onPost('/oauth2/token').reply(200, authResult)
       .onGet('/noMessageError').reply(500, { error: { code: 99 } })
       .onAny().reply(404)
   })
@@ -74,6 +77,16 @@ describe('Request', function () {
   it('should throw error in case of application bad request', async function () {
     await client.authenticate(authResult.access_token, undefined, 3600 + Date.now() / 1000)
     await assert.rejects(async () => { await client.request('GET', '/noMessageError') }, new Error('HTTP request /noMessageError failed: {"code":99} (500)'))
+  })
+  it('should retry in case of HTTP 401 expired token', async function () {
+    await client.authenticate(authResult.access_token, authResult.refresh_token, 3600 + Date.now() / 1000)
+    const result = await client.request('GET', '/tokenExpired401')
+    assert.deepStrictEqual(result, { body: '401' })
+  })
+  it('should retry in case of HTTP 403 expired token', async function () {
+    await client.authenticate(authResult.access_token, authResult.refresh_token, 3600 + Date.now() / 1000)
+    const result = await client.request('GET', '/tokenExpired403')
+    assert.deepStrictEqual(result, { body: '403' })
   })
 })
 
