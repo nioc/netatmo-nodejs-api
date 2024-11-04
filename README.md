@@ -117,6 +117,11 @@ async function main () {
 main()
 ```
 
+## About types
+
+From version 2.0, this library is written in TypeScript. Response typing comes from the Netatmo Swagger, transformed into a TS interface by SwaggerEditor.
+Errors may be present, so don't hesitate to [create an issue](https://github.com/nioc/netatmo-nodejs-api/issues/new) for fix.
+
 ## Versioning
 
 netatmo-nodejs-api is maintained under the [semantic versioning](https://semver.org/) guidelines.
