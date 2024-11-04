@@ -25,71 +25,96 @@ npm install netatmo-nodejs-api
 
 ## Usage
 
-### Basic example with refresh token and client credentials grant type
+You need to [create an application](https://dev.netatmo.com/apps/createanapp#form)
+
+### ~~Basic example with Client Credentials grant type~~
+
+This method has been deprecated, see [Natatmo documentation](https://dev.netatmo.com/apidocumentation/oauth#client-credential)
+
+### Basic example with Refresh Token grant type
+
+You need to generate a token on [Netatmo website](https://dev.netatmo.com/apps/):
+-    choose scopes
+-    click `generate token` button and accept the condition
+-    copy both `Access Token` and `Refresh Token` and use it in the following code
+
 ```js
 const { NetatmoClient, SCOPE_BASIC_CAMERA } = require('netatmo-nodejs-api')
 
-// you need to set your own information
-const clientId = '60...'
-const clientSecret = 'abc...'
-const username = 'user@domain'
-const password = 'pass'
-let refreshToken = ''
-let accessToken = ''
-let expiresInTimestamp = 0
+async function main () {
+  // you need to set your own information
+  const clientId = ''
+  const clientSecret = ''
+  let accessToken = ''
+  let refreshToken = ''
+  let expiresInTimestamp = 0
 
-try {
-  // create client
-  const client = new NetatmoClient(clientId, clientSecret, SCOPE_BASIC_CAMERA, { timeout: 1000 })
+  try {
+    // create client
+    const client = new NetatmoClient(clientId, clientSecret, SCOPE_BASIC_CAMERA, { timeout: 1000 })
 
-  // authenticate
-  if (!client.checkAndSetAccesToken(accessToken, expiresInTimestamp)) {
-    if (refreshToken) {
-      // use previous refresh token
-      ({ accessToken, refreshToken, expiresInTimestamp } = await client.authenticateByRefreshToken(refreshToken))
-    } else {
-      // use user credentials
-      ({ accessToken, refreshToken, expiresInTimestamp } = await client.authenticateByClientCredentials(username, password))
+    // authenticate
+    if (!client.checkAndSetAccesToken(accessToken, expiresInTimestamp)) {
+      if (refreshToken) {
+        // use previous refresh token
+        ({ accessToken, refreshToken, expiresInTimestamp } = await client.authenticateByRefreshToken(refreshToken))
+        // you should store accessToken, refreshToken, expiresInTimestamp for further request
+        console.log('update the code with following 3 lines:')
+        console.log(`  let accessToken = '${accessToken}'`)
+        console.log(`  let refreshToken = '${refreshToken}'`)
+        console.log(`  let expiresInTimestamp = ${expiresInTimestamp}`)
+      } else {
+        throw new Error('Refresh token is missing')
+      }
     }
-    // you should store accessToken, refreshToken, expiresInTimestamp for further request
-  }
 
-  // get data
-  const homes = await client.getHomes()
-} catch (error) {
-  console.log(error)
+    // get data
+    const homes = await client.getHomes()
+    console.log(homes)
+  } catch (error) {
+    console.log(error)
+  }
 }
+
+main()
 ```
 
-### Authenticate wrapper (try access token, refresh token or client credentials)
+### Authenticate wrapper (try access token or refresh token)
 
-You can use the `authenticate` method which wrap 3 authentication methods.
+You can use the `authenticate` method which wrap 2 authentication methods.
 
 ```js
 const { NetatmoClient, SCOPE_BASIC_CAMERA } = require('netatmo-nodejs-api')
 
-// you need to set your own information
-const clientId = '60...'
-const clientSecret = 'abc...'
-const username = 'user@domain'
-const password = 'pass'
-let refreshToken = ''
-let accessToken = ''
-let expiresInTimestamp = 0
+async function main () {
+  // you need to set your own information
+  const clientId = ''
+  const clientSecret = ''
+  let refreshToken = ''
+  let accessToken = ''
+  let expiresInTimestamp = 0
 
-try {
-  // create client
-  const client = new NetatmoClient(clientId, clientSecret, SCOPE_BASIC_CAMERA, { timeout: 1000 })
+  try {
+    // create client
+    const client = new NetatmoClient(clientId, clientSecret, SCOPE_BASIC_CAMERA, { timeout: 1000 });
 
-  // authenticate
-  ({ accessToken, refreshToken, expiresInTimestamp } = await client.authenticate(accessToken, refreshToken, expiresInTimestamp, username, password))
-  // you should store accessToken, refreshToken, expiresInTimestamp for further request
+    // authenticate
+    ({ accessToken, refreshToken, expiresInTimestamp } = await client.authenticate(accessToken, refreshToken, expiresInTimestamp))
+    // you should store accessToken, refreshToken, expiresInTimestamp for further request
+    console.log('update the code with following:', refreshToken)
+    console.log(`  let accessToken = '${accessToken}'`)
+    console.log(`  let refreshToken = '${refreshToken}'`)
+    console.log(`  let expiresInTimestamp = ${expiresInTimestamp}`)
 
-  // get data
-  const homes = await client.getHomes()
-} catch (error) {
-  console.log(error)
+    // get data
+    const homes = await client.getHomes()
+    console.log(homes)
+  } catch (error) {
+    console.log(error)
+  }
 }
+
+main()
 ```
 
 ## Versioning

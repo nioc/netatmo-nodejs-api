@@ -11,8 +11,6 @@ const clientSecret = 'clientSecret'
 const scope = 'scope'
 const requestConfig = { dummy: '1' }
 const redirectUrl = 'http://localhost/auth'
-const username = 'user'
-const password = 'password'
 const authResult = {
   access_token: '2YotnFZFEjr1zCsicMWpAA',
   expires_in: 10800,
@@ -141,22 +139,6 @@ describe('Authentication', function () {
     })
   })
 
-  describe('User credentials grant type', function () {
-    it('should throw error if user credentials are missing', async function () {
-      const client = new NetatmoClient(clientId, clientSecret, scope, {})
-      await assert.rejects(async () => { await client.authenticateByClientCredentials(null, password) }, new Error('Username and password must be provided'))
-      await assert.rejects(async () => { await client.authenticateByClientCredentials(username, undefined) }, new Error('Username and password must be provided'))
-    })
-
-    it('should obtain token with client credentials', async function () {
-      const client = new NetatmoClient(clientId, clientSecret, scope, {})
-      const { accessToken, refreshToken, expiresInTimestamp } = await client.authenticateByClientCredentials(username, password)
-      assert.strictEqual(accessToken, authResult.access_token)
-      assert.strictEqual(refreshToken, authResult.refresh_token)
-      assert.strictEqual(expiresInTimestamp > Date.now() / 1000, true)
-    })
-  })
-
   describe('Refresh token', function () {
     it('should throw error if refresh token is missing', async function () {
       const client = new NetatmoClient(clientId, clientSecret, scope, {})
@@ -181,13 +163,6 @@ describe('Authentication', function () {
     it('should obtain token with refresh token', async function () {
       const client = new NetatmoClient(clientId, clientSecret, scope, {})
       const { accessToken, refreshToken, expiresInTimestamp } = await client.authenticate(undefined, authResult.refresh_token)
-      assert.strictEqual(accessToken, authResult.access_token)
-      assert.strictEqual(refreshToken, authResult.refresh_token)
-      assert.strictEqual(expiresInTimestamp > Date.now() / 1000, true)
-    })
-    it('should obtain token with client credentials', async function () {
-      const client = new NetatmoClient(clientId, clientSecret, scope, {})
-      const { accessToken, refreshToken, expiresInTimestamp } = await client.authenticate(undefined, undefined, 0, username, password)
       assert.strictEqual(accessToken, authResult.access_token)
       assert.strictEqual(refreshToken, authResult.refresh_token)
       assert.strictEqual(expiresInTimestamp > Date.now() / 1000, true)
