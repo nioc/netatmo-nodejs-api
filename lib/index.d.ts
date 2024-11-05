@@ -17,11 +17,11 @@ declare const SCOPE_FULL_CAMERA = "read_camera write_camera access_camera read_p
  * Full scope for camera and weather station, end user has to provide an explicit consent with autorization code flow
  */
 declare const SCOPE_FULL = "read_station read_camera write_camera access_camera read_presence access_presence";
-type NetatmoToken = {
+interface NetatmoToken {
     access_token: string;
     refresh_token: string;
     expires_in: number;
-};
+}
 declare class Token {
     accessToken: string | null;
     refreshToken: string | null;

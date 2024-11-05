@@ -27,7 +27,7 @@ const SCOPE_FULL_CAMERA = 'read_camera write_camera access_camera read_presence 
  */
 const SCOPE_FULL = 'read_station read_camera write_camera access_camera read_presence access_presence'
 
-type NetatmoToken = {
+interface NetatmoToken {
   access_token: string
   refresh_token: string
   expires_in: number
@@ -227,6 +227,7 @@ class NetatmoClient {
    * @param {boolean} isRetry This is the second try for this request (default false)
    * @return {object|Array} Data in response
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async request(method: 'GET' | 'POST', path: string, params: Record<string, any> | null = null, data: querystring.ParsedUrlQueryInput | null = null, isRetry: boolean = false): Promise<any> {
     const config: AxiosRequestConfig = {
       ...this.requestConfig,
