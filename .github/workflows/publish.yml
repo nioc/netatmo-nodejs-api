@@ -21,6 +21,12 @@ jobs:
           cache-dependency-path: 'package-lock.json'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm build
+
       - name: Publish package on npm
         run: npm publish
         env:

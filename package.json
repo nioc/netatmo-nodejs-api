@@ -25,7 +25,7 @@
   "homepage": "https://github.com/nioc/netatmo-nodejs-api",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nioc/netatmo-nodejs-api.git"
+    "url": "git+https://github.com/nioc/netatmo-nodejs-api.git"
   },
   "bugs": "https://github.com/nioc/netatmo-nodejs-api/issues",
   "devDependencies": {
