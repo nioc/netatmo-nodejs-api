@@ -43,6 +43,10 @@ jobs:
 
     - name: Report NYC coverage to Coveralls
       uses: coverallsapp/github-action@v2
+      with:
+        file: coverage/coverage-summary.json
+        debug: true
+        fail-on-error: false
 
     - name: Report NYC coverage to pull request
       uses: sidx1024/report-nyc-coverage-github-action@v1.2.7
