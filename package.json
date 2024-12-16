@@ -8,7 +8,8 @@
     "build": "tsc -p .",
     "lint": "eslint ./src/**.ts",
     "test": "mocha test/index.test.js",
-    "cover": "nyc --reporter=html mocha test/index.test.js",
+    "cover-html": "nyc --reporter=html mocha test/index.test.js",
+    "cover": "nyc --reporter=json-summary --exclude-after-remap false mocha test/index.test.js",
     "coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls"
   },
   "engines": {

@@ -40,3 +40,11 @@ jobs:
 
     - name: Test and cover
       run: npm run cover
+
+    - name: Report NYC coverage to Coveralls
+      uses: coverallsapp/github-action@v2
+
+    - name: Report NYC coverage to pull request
+      uses: sidx1024/report-nyc-coverage-github-action@v1.2.7
+      with:
+        coverage_file: "coverage/coverage-summary.json"
