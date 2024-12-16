@@ -2,3 +2,5 @@ eslint.config.mjs
 tsconfig.json
 .github
 test
+coverage
+.nyc_output
