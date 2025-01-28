@@ -280,12 +280,12 @@ class NetatmoClient {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async request(method: 'GET' | 'POST', path: string, params: Record<string, any> | null = null, data: querystring.ParsedUrlQueryInput | null = null, isRetry: boolean = false): Promise<any> {
     const config: AxiosRequestConfig = {
-      ...this.requestConfig,
-      method,
       baseURL,
-      url: path,
       headers: {
       },
+      ...this.requestConfig,
+      method,
+      url: path,
     }
     if (data) {
       // as POST method accept only `application/x-www-form-urlencoded` content-type, transform data object into query string
