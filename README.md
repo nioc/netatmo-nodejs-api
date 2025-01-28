@@ -4,7 +4,6 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/nioc/netatmo-nodejs-api/commit.yml?label=github%20build)](https://github.com/nioc/netatmo-nodejs-api/actions/workflows/commit.yml)
 [![Coverage Status](https://coveralls.io/repos/github/nioc/netatmo-nodejs-api/badge.svg?branch=master)](https://coveralls.io/github/nioc/netatmo-nodejs-api?branch=master)
 [![GitHub release](https://img.shields.io/github/release/nioc/netatmo-nodejs-api.svg)](https://github.com/nioc/netatmo-nodejs-api/releases/latest)
-[![npms.io (final)](https://img.shields.io/npms-io/final-score/netatmo-nodejs-api)](https://www.npmjs.com/package/netatmo-nodejs-api)
 [![npm](https://img.shields.io/npm/dt/netatmo-nodejs-api)](https://www.npmjs.com/package/netatmo-nodejs-api)
 
 Node.js API wrapper for Netatmo API.
