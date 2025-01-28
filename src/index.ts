@@ -53,6 +53,56 @@ class Token {
   }
 }
 
+/**
+ * Invalid client configuration
+ */
+class ConfigError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ConfigError'
+  }
+}
+
+/**
+ * Invalid input data
+ */
+class InputError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'InputError'
+  }
+}
+
+/**
+ * Authentication error
+ */
+class AuthError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'AuthError'
+  }
+}
+
+/**
+ * HTTP error (syntax issue or incorrect parameter)
+ */
+class RequestError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'RequestError'
+  }
+}
+
+/**
+ * Network error
+ */
+class NetworkError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'NetworkError'
+  }
+}
+
 class NetatmoClient {
   clientId: string
   clientSecret: string
@@ -76,7 +126,7 @@ class NetatmoClient {
    */
   constructor(clientId: string, clientSecret: string, scope: string, requestConfig: AxiosRequestConfig = {}) {
     if (!clientId || !clientSecret) {
-      throw new Error('Client id and client secret must be provided, see https://dev.netatmo.com/apidocumentation')
+      throw new ConfigError('Client id and client secret must be provided, see https://dev.netatmo.com/apidocumentation')
     }
     this.clientId = clientId
     this.clientSecret = clientSecret
@@ -110,7 +160,7 @@ class NetatmoClient {
     if (refreshToken) {
       return this.authenticateByRefreshToken(refreshToken)
     }
-    throw new Error('Refresh token is missing')
+    throw new InputError('Refresh token is missing')
   }
 
   /**
@@ -125,7 +175,7 @@ class NetatmoClient {
       this.redirectUrl = redirectUrl
     }
     if (!this.redirectUrl) {
-      throw new Error('Redirect url must be provided')
+      throw new InputError('Redirect url must be provided')
     }
     this.state = statePrefix + Math.random() * 10000000000000000
     const query = querystring.stringify({
@@ -147,10 +197,10 @@ class NetatmoClient {
    */
   async authenticateByAuthorizationCode(authorizationCode: string, redirectUrl: string, state: string): Promise<Token> {
     if (!authorizationCode || !redirectUrl) {
-      throw new Error('Authorization code and redirect url must be provided')
+      throw new InputError('Authorization code and redirect url must be provided')
     }
     if (this.state !== state) {
-      throw new Error('State is not identical as the one provided during authorize url request')
+      throw new InputError('State is not identical as the one provided during authorize url request')
     }
     this.authorizationCode = authorizationCode
     this.redirectUrl = redirectUrl
@@ -173,7 +223,7 @@ class NetatmoClient {
    */
   async authenticateByRefreshToken(refreshToken: string): Promise<Token> {
     if (!refreshToken) {
-      throw new Error('Refresh token must be provided')
+      throw new InputError('Refresh token must be provided')
     }
     this.refreshToken = refreshToken
     const authentication: NetatmoToken = await this.request(HTTP_POST, PATH_AUTH, null, {
@@ -193,7 +243,7 @@ class NetatmoClient {
    */
   setToken(netatmoAuthentication: NetatmoToken): Token {
     if (!netatmoAuthentication.access_token || !netatmoAuthentication.refresh_token || !netatmoAuthentication.expires_in) {
-      throw new Error('Invalid Netatmo token')
+      throw new InputError('Invalid Netatmo token')
     }
     this.accessToken = netatmoAuthentication.access_token
     this.refreshToken = netatmoAuthentication.refresh_token
@@ -247,7 +297,7 @@ class NetatmoClient {
 
     if (path !== PATH_AUTH) {
       if (!this.accessToken) {
-        throw new Error('Access token must be provided')
+        throw new AuthError('Access token must be provided')
       }
       config.headers!.Authorization = `Bearer ${this.accessToken}`
     }
@@ -265,23 +315,26 @@ class NetatmoClient {
             return await this.request(method, path, params, data, true)
           }
           if (error.response.data.error_description) {
-            // bad request error
-            throw new Error(`HTTP request ${path} failed: ${error.response.data.error_description} (${error.response.status})`)
+            // bad request error (Oauth2 RFC syntax)
+            throw new AuthError(`HTTP request ${path} failed: ${error.response.data.error_description} (${error.response.status})`)
           }
           if (error.response.data.error && error.response.data.error.message) {
             // standard error
-            throw new Error(`HTTP request ${path} failed: ${error.response.data.error.message} (${error.response.status})`)
+            throw new RequestError(`HTTP request ${path} failed: ${error.response.data.error.message} (${error.response.status})`)
           }
           if (error.response.data.error) {
             // other error
-            throw new Error(`HTTP request ${path} failed: ${JSON.stringify(error.response.data.error)} (${error.response.status})`)
+            throw new RequestError(`HTTP request ${path} failed: ${JSON.stringify(error.response.data.error)} (${error.response.status})`)
           }
+        }
+        if (error.code && ['ENOTFOUND', 'ECONNRESET', 'ECONNREFUSED', 'ECONNABORTED'].includes(error.code)) {
+          throw new NetworkError(`HTTP request ${path} failed: ${error.message}`)
         }
       }
       if (error instanceof Error) {
-        throw new Error(`HTTP request ${path} failed: ${error.message}`)
+        throw new RequestError(`HTTP request ${path} failed: ${error.message}`)
       }
-      throw new Error(`HTTP request ${path} failed: ${error}`)
+      throw new RequestError(`HTTP request ${path} failed: ${error}`)
     }
   }
 
@@ -309,7 +362,7 @@ class NetatmoClient {
    */
   async getEventsUntil(homeId: string, eventId: string): Promise<EventsList> {
     if (!homeId || !eventId) {
-      throw new Error('Home id and event id must be provided')
+      throw new InputError('Home id and event id must be provided')
     }
     const params = {
       home_id: homeId,
@@ -328,7 +381,7 @@ class NetatmoClient {
    */
   async getLastEventOf(homeId: string, personId: string, offset: number): Promise<EventsList> {
     if (!homeId || !personId) {
-      throw new Error('Home id and person id must be provided')
+      throw new InputError('Home id and person id must be provided')
     }
     const params = {
       home_id: homeId,
@@ -348,7 +401,7 @@ class NetatmoClient {
    */
   async getNextEvents(homeId: string, eventId: string, size: number): Promise<EventsList> {
     if (!homeId || !eventId) {
-      throw new Error('Home id and event id must be provided')
+      throw new InputError('Home id and event id must be provided')
     }
     const params = {
       home_id: homeId,
@@ -367,7 +420,7 @@ class NetatmoClient {
    */
   async getCameraPicture(imageId: string, key: string): Promise<CameraImage> {
     if (!imageId || !key) {
-      throw new Error('Image id and key must be provided')
+      throw new InputError('Image id and key must be provided')
     }
     const params = {
       image_id: imageId,
@@ -389,7 +442,7 @@ class NetatmoClient {
    */
   async getPublicData(latNE: number, lonNE: number, latSW: number, lonSW: number, requiredData: string, filter = false): Promise<PublicData[]> {
     if (!latNE || !lonNE || !latSW || !lonSW) {
-      throw new Error('Latitude and Longitude must be provided')
+      throw new InputError('Latitude and Longitude must be provided')
     }
     const params = {
       lat_ne: latNE,
@@ -433,7 +486,7 @@ class NetatmoClient {
    */
   async getMeasure(deviceId: string, moduleId: string, scale: string, type: string, dateBegin: number, dateEnd: number, limit: number, optimize: boolean, realTime: boolean): Promise<Measure[]> {
     if (!deviceId || !scale || !type) {
-      throw new Error('Device id, scale and type must be provided')
+      throw new InputError('Device id, scale and type must be provided')
     }
     const params = {
       device_id: deviceId,
@@ -450,4 +503,15 @@ class NetatmoClient {
   }
 }
 
-export { NetatmoClient, SCOPE_BASIC_CAMERA, SCOPE_FULL_CAMERA, SCOPE_FULL, SCOPE_BASIC_WEATHER }
+export {
+  NetatmoClient,
+  ConfigError,
+  InputError,
+  AuthError,
+  RequestError,
+  NetworkError,
+  SCOPE_BASIC_CAMERA,
+  SCOPE_FULL_CAMERA,
+  SCOPE_FULL,
+  SCOPE_BASIC_WEATHER,
+}

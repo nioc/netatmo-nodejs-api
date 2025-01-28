@@ -1,10 +1,21 @@
-/* eslint-disable no-unused-vars,node/no-unpublished-require,no-undef,camelcase */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable no-undef */
+/* eslint-disable @stylistic/max-statements-per-line */
+
 const { describe } = require('mocha')
 const assert = require('assert')
 const axios = require('axios')
 const MockAdapter = require('axios-mock-adapter')
 const mock = new MockAdapter(axios)
-const { NetatmoClient } = require('../lib/')
+const {
+  NetatmoClient,
+  ConfigError,
+  InputError,
+  AuthError,
+  RequestError,
+  NetworkError,
+} = require('../lib/')
 
 const clientId = 'clientId'
 const clientSecret = 'clientSecret'
@@ -19,8 +30,8 @@ const authResult = {
 
 describe('Create NetatmoClient', function () {
   it('should throw error if no application id is provided', function () {
-    assert.throws(() => { const client = new NetatmoClient(null, clientSecret, scope, {}) }, new Error('Client id and client secret must be provided, see https://dev.netatmo.com/apidocumentation'))
-    assert.throws(() => { const client = new NetatmoClient(clientId, null, scope, {}) }, new Error('Client id and client secret must be provided, see https://dev.netatmo.com/apidocumentation'))
+    assert.throws(() => { const client = new NetatmoClient(null, clientSecret, scope, {}) }, new ConfigError('Client id and client secret must be provided, see https://dev.netatmo.com/apidocumentation'))
+    assert.throws(() => { const client = new NetatmoClient(clientId, null, scope, {}) }, new ConfigError('Client id and client secret must be provided, see https://dev.netatmo.com/apidocumentation'))
   })
   it('should return a new instance of NetatmoClient with valid parameters', function () {
     const client = new NetatmoClient(clientId, clientSecret, scope, requestConfig)
@@ -58,23 +69,23 @@ describe('Request', function () {
     client = new NetatmoClient(clientId, clientSecret, scope, {})
   })
   it('should throw error if access token is not set', async function () {
-    await assert.rejects(async () => { await client.request('GET', '/path', { type: 'params' }, { type: 'data' }) }, new Error('Access token must be provided'))
+    await assert.rejects(async () => { await client.request('GET', '/path', { type: 'params' }, { type: 'data' }) }, new AuthError('Access token must be provided'))
   })
   it('should throw error in case of timeout', async function () {
     await client.authenticate(authResult.access_token, undefined, 3600 + Date.now() / 1000)
-    await assert.rejects(async () => { await client.request('GET', '/timeout') }, new Error('HTTP request /timeout failed: timeout of 0ms exceeded'))
+    await assert.rejects(async () => { await client.request('GET', '/timeout') }, new NetworkError('HTTP request /timeout failed: timeout of 0ms exceeded'))
   })
   it('should throw error in case of OAuth2 bad request', async function () {
     await client.authenticate(authResult.access_token, undefined, 3600 + Date.now() / 1000)
-    await assert.rejects(async () => { await client.request('GET', '/authError') }, new Error('HTTP request /authError failed: Missing parameters, "username" and "password" are required (400)'))
+    await assert.rejects(async () => { await client.request('GET', '/authError') }, new AuthError('HTTP request /authError failed: Missing parameters, "username" and "password" are required (400)'))
   })
   it('should throw error in case of application bad request', async function () {
     await client.authenticate(authResult.access_token, undefined, 3600 + Date.now() / 1000)
-    await assert.rejects(async () => { await client.request('GET', '/appError') }, new Error('HTTP request /appError failed: Access token is missing (400)'))
+    await assert.rejects(async () => { await client.request('GET', '/appError') }, new RequestError('HTTP request /appError failed: Access token is missing (400)'))
   })
   it('should throw error in case of application bad request', async function () {
     await client.authenticate(authResult.access_token, undefined, 3600 + Date.now() / 1000)
-    await assert.rejects(async () => { await client.request('GET', '/noMessageError') }, new Error('HTTP request /noMessageError failed: {"code":99} (500)'))
+    await assert.rejects(async () => { await client.request('GET', '/noMessageError') }, new RequestError('HTTP request /noMessageError failed: {"code":99} (500)'))
   })
   it('should retry in case of HTTP 401 expired token', async function () {
     await client.authenticate(authResult.access_token, authResult.refresh_token, 3600 + Date.now() / 1000)
@@ -102,7 +113,7 @@ describe('Authentication', function () {
     describe('Get URL', function () {
       it('throw error if redirect URL is missing', function () {
         const client = new NetatmoClient(clientId, clientSecret, scope, {})
-        assert.throws(() => { client.getAuthorizeUrl() }, new Error('Redirect url must be provided'))
+        assert.throws(() => { client.getAuthorizeUrl() }, new InputError('Redirect url must be provided'))
       })
       it('should generate an authorize code grant url', function () {
         const querystring = require('querystring')
@@ -119,13 +130,13 @@ describe('Authentication', function () {
     describe('Use autorize code', function () {
       it('should throw error if authorization code or redirect are missing', async function () {
         const client = new NetatmoClient(clientId, clientSecret, scope, {})
-        await assert.rejects(async () => { await client.authenticateByAuthorizationCode(null, redirectUrl, 'state') }, new Error('Authorization code and redirect url must be provided'))
-        await assert.rejects(async () => { await client.authenticateByAuthorizationCode('authCode', undefined, 'state') }, new Error('Authorization code and redirect url must be provided'))
+        await assert.rejects(async () => { await client.authenticateByAuthorizationCode(null, redirectUrl, 'state') }, new InputError('Authorization code and redirect url must be provided'))
+        await assert.rejects(async () => { await client.authenticateByAuthorizationCode('authCode', undefined, 'state') }, new InputError('Authorization code and redirect url must be provided'))
       })
       it('should throw error if state is not the one provided', async function () {
         const client = new NetatmoClient(clientId, clientSecret, scope, {})
         client.getAuthorizeUrl(redirectUrl, 'state')
-        await assert.rejects(async () => { await client.authenticateByAuthorizationCode('authCode', redirectUrl, 'another') }, new Error('State is not identical as the one provided during authorize url request'))
+        await assert.rejects(async () => { await client.authenticateByAuthorizationCode('authCode', redirectUrl, 'another') }, new InputError('State is not identical as the one provided during authorize url request'))
       })
 
       it('should obtain token with autorize code', async function () {
@@ -142,7 +153,7 @@ describe('Authentication', function () {
   describe('Refresh token', function () {
     it('should throw error if refresh token is missing', async function () {
       const client = new NetatmoClient(clientId, clientSecret, scope, {})
-      await assert.rejects(async () => { await client.authenticateByRefreshToken() }, new Error('Refresh token must be provided'))
+      await assert.rejects(async () => { await client.authenticateByRefreshToken() }, new InputError('Refresh token must be provided'))
     })
 
     it('should obtain token with refresh token', async function () {
@@ -155,6 +166,10 @@ describe('Authentication', function () {
   })
 
   describe('Authenticate wrapper', function () {
+    it('should throw error if refresh token is missing', async function () {
+      const client = new NetatmoClient(clientId, clientSecret, scope, {})
+      await assert.rejects(async () => { await client.authenticate(undefined, undefined, undefined) }, new InputError('Refresh token is missing'))
+    })
     it('should use provided valid access token', async function () {
       const client = new NetatmoClient(clientId, clientSecret, scope, {})
       const { accessToken, refreshToken, expiresInTimestamp } = await client.authenticate(authResult.access_token, undefined, 3600 + Date.now() / 1000)
@@ -180,7 +195,7 @@ describe('Authentication', function () {
     })
     it('should throw error if received token is invalid', async function () {
       const client = new NetatmoClient(clientId, clientSecret, scope, {})
-      await assert.rejects(async () => { await client.authenticateByRefreshToken(authResult.refresh_token) }, new Error('Invalid Netatmo token'))
+      await assert.rejects(async () => { await client.authenticateByRefreshToken(authResult.refresh_token) }, new InputError('Invalid Netatmo token'))
     })
   })
 })
@@ -206,7 +221,7 @@ describe('Weather', function () {
 
   describe('getPublicData API', function () {
     it('should throw error if area is not provided', async function () {
-      await assert.rejects(async () => { await client.getPublicData() }, new Error('Latitude and Longitude must be provided'))
+      await assert.rejects(async () => { await client.getPublicData() }, new InputError('Latitude and Longitude must be provided'))
     })
     it('should return public data', async function () {
       const result = await client.getPublicData(1, 1, 1, 1)
@@ -223,7 +238,7 @@ describe('Weather', function () {
 
   describe('getMeasure API', function () {
     it('should throw error if query is not valid', async function () {
-      await assert.rejects(async () => { await client.getMeasure() }, new Error('Device id, scale and type must be provided'))
+      await assert.rejects(async () => { await client.getMeasure() }, new InputError('Device id, scale and type must be provided'))
     })
     it('should return stations data', async function () {
       const result = await client.getMeasure(device_id, module_id, scale, type, 1, 2, 5, true, false)
@@ -263,8 +278,8 @@ describe('Security', function () {
 
   describe('getEventsUntil API', function () {
     it('should throw error if home id or event id are not provided', async function () {
-      await assert.rejects(async () => { await client.getEventsUntil(null, event_id) }, new Error('Home id and event id must be provided'))
-      await assert.rejects(async () => { await client.getEventsUntil(home_id) }, new Error('Home id and event id must be provided'))
+      await assert.rejects(async () => { await client.getEventsUntil(null, event_id) }, new InputError('Home id and event id must be provided'))
+      await assert.rejects(async () => { await client.getEventsUntil(home_id) }, new InputError('Home id and event id must be provided'))
     })
     it('should return events', async function () {
       const result = await client.getEventsUntil(home_id, event_id)
@@ -274,8 +289,8 @@ describe('Security', function () {
 
   describe('getLastEventOf API', function () {
     it('should throw error if home id or person id are not provided', async function () {
-      await assert.rejects(async () => { await client.getLastEventOf(null, person_id) }, new Error('Home id and person id must be provided'))
-      await assert.rejects(async () => { await client.getLastEventOf(home_id) }, new Error('Home id and person id must be provided'))
+      await assert.rejects(async () => { await client.getLastEventOf(null, person_id) }, new InputError('Home id and person id must be provided'))
+      await assert.rejects(async () => { await client.getLastEventOf(home_id) }, new InputError('Home id and person id must be provided'))
     })
     it('should return person events', async function () {
       const result = await client.getLastEventOf(home_id, person_id, 32)
@@ -285,8 +300,8 @@ describe('Security', function () {
 
   describe('getNextEvents API', function () {
     it('should throw error if home id or event id are not provided', async function () {
-      await assert.rejects(async () => { await client.getNextEvents(null, event_id) }, new Error('Home id and event id must be provided'))
-      await assert.rejects(async () => { await client.getNextEvents(home_id) }, new Error('Home id and event id must be provided'))
+      await assert.rejects(async () => { await client.getNextEvents(null, event_id) }, new InputError('Home id and event id must be provided'))
+      await assert.rejects(async () => { await client.getNextEvents(home_id) }, new InputError('Home id and event id must be provided'))
     })
     it('should return events', async function () {
       const result = await client.getNextEvents(home_id, event_id, 33)
@@ -296,8 +311,8 @@ describe('Security', function () {
 
   describe('getCameraPicture API', function () {
     it('should throw error if image id or key are not provided', async function () {
-      await assert.rejects(async () => { await client.getCameraPicture(null, key) }, new Error('Image id and key must be provided'))
-      await assert.rejects(async () => { await client.getCameraPicture(image_id) }, new Error('Image id and key must be provided'))
+      await assert.rejects(async () => { await client.getCameraPicture(null, key) }, new InputError('Image id and key must be provided'))
+      await assert.rejects(async () => { await client.getCameraPicture(image_id) }, new InputError('Image id and key must be provided'))
     })
     it('should return picture', async function () {
       const result = await client.getCameraPicture(image_id, key)
