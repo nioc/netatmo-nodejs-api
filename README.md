@@ -1,6 +1,6 @@
 # netatmo-nodejs-api
 
-[![license: AGPLv3](https://img.shields.io/badge/license-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![license: LGPLv3](https://img.shields.io/badge/license-LGPL--3.0--or--later-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/nioc/netatmo-nodejs-api/commit.yml?label=github%20build)](https://github.com/nioc/netatmo-nodejs-api/actions/workflows/commit.yml)
 [![Coverage Status](https://coveralls.io/repos/github/nioc/netatmo-nodejs-api/badge.svg?branch=master)](https://coveralls.io/github/nioc/netatmo-nodejs-api?branch=master)
 [![GitHub release](https://img.shields.io/github/release/nioc/netatmo-nodejs-api.svg)](https://github.com/nioc/netatmo-nodejs-api/releases/latest)
@@ -129,4 +129,4 @@ See the [releases](https://github.com/nioc/netatmo-nodejs-api/releases) on this 
 
 ## License
 
-This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE.md) file for details
+This project is licensed under the GNU Lesser General Public License v3.0 - see the [LICENSE](LICENSE.md) file for details
